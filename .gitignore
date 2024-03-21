@@ -2,3 +2,6 @@
 *.log
 *.root
 *.gz
+log*
+*.json
+*.npy

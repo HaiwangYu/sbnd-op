@@ -33,12 +33,13 @@ local wcls_input = {
 };
 
 local tensor_dump = function(anode, aname) {
+    // https://github.com/WireCell/wire-cell-toolkit/blob/master/aux/docs/tensor-data-model.org#tensor-archive-files
     local cs = g.pnode({
         type: "TensorFileSink",
         name: "tensorsink-"+aname,
         data: {
             outname: "tensor-apa-"+aname+".tar.gz",
-            prefix: "clustering_", // json, numpy, dummy
+            prefix: "opflash_",
             dump_mode: true,
         }
     }, nin=1, nout=0),
