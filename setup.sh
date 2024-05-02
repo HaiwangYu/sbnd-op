@@ -1,6 +1,3 @@
-source /cvmfs/sbnd.opensciencegrid.org/products/sbnd/setup_sbnd.sh
-setup sbndcode v09_84_00_01 -q e26:prof
-
-source /exp/uboone/app/users/yuhw/larsoft/v09_84_00/localProducts_larsoft_v09_84_00_e26_prof/setup
-mrbsetenv
-mrbslp
+source /exp/uboone/app/users/yuhw/setup_sbnd.sh
+source /exp/uboone/app/users/yuhw/use_local_wirecell.sh
+path-prepend /exp/uboone/app/users/yuhw/sbnd/op/cfg WIRECELL_PATH
