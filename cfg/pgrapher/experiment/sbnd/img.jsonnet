@@ -38,32 +38,32 @@ local img = {
         },
     }, nin=1, nout=1, uses=[waveform_map, anode]),
 
-    // added Ewerton 2023-08-23
-    local chsel_pipes = 
-      g.pnode({
-        type: 'ChannelSelector',
-        //name: 'chsel%d' % n,
-        name: 'chsel%d' % anode.data.ident,
-        data: {
-          channels: std.range(5632 * anode.data.ident, 5632 * (anode.data.ident + 1) - 1),
-          //tags: ['orig%d' % n], // traces tag //commented? Ewerton 2023-09-xx
-          tags: ['gauss%d' % anode.data.ident, 'wiener%d' % anode.data.ident], // changed Ewerton 2023-09-27
-        },
-      }, nin=1, nout=1, uses=[anode]),
+    // // added Ewerton 2023-08-23
+    // local chsel_pipes = 
+    //   g.pnode({
+    //     type: 'ChannelSelector',
+    //     //name: 'chsel%d' % n,
+    //     name: 'chsel%d' % anode.data.ident,
+    //     data: {
+    //       channels: std.range(5632 * anode.data.ident, 5632 * (anode.data.ident + 1) - 1),
+    //       //tags: ['orig%d' % n], // traces tag //commented? Ewerton 2023-09-xx
+    //       tags: ['gauss%d' % anode.data.ident, 'wiener%d' % anode.data.ident], // changed Ewerton 2023-09-27
+    //     },
+    //   }, nin=1, nout=1, uses=[anode]),
 
-    local mag = g.pnode({
-          type: 'MagnifySink',
-          name: 'magimgtest%d' % anode.data.ident,
-          data: {
-                output_filename: "magoutput.root",
-                root_file_mode: 'UPDATE',
-                frames: ['gauss%d' %anode.data.ident, 'wiener%d' %anode.data.ident],
-                summaries: ['wiener%d' %anode.data.ident],
-                summary_operator: { ['wiener%d' % anode.data.ident]: 'set' },
-                trace_has_tag: true,
-                anode: wc.tn(anode),
-          },
-    }, nin=1, nout=1, uses=[anode]),
+    // local mag = g.pnode({
+    //       type: 'MagnifySink',
+    //       name: 'magimgtest%d' % anode.data.ident,
+    //       data: {
+    //             output_filename: "magoutput.root",
+    //             root_file_mode: 'UPDATE',
+    //             frames: ['gauss%d' %anode.data.ident, 'wiener%d' %anode.data.ident],
+    //             summaries: ['wiener%d' %anode.data.ident],
+    //             summary_operator: { ['wiener%d' % anode.data.ident]: 'set' },
+    //             trace_has_tag: true,
+    //             anode: wc.tn(anode),
+    //       },
+    // }, nin=1, nout=1, uses=[anode]),
 
     local cmm_mod = g.pnode({
         type: 'CMMModifier',
@@ -126,7 +126,7 @@ local img = {
                 anode: wc.tn(anode),
             },
         }, nin=1, nout=1, uses=[anode]),
-        ret: g.pipeline([chsel_pipes, mag, cmm_mod, frame_masking, charge_err], "uboone-preproc"), //changed Ewerton 2023-10-05
+        ret: g.pipeline([cmm_mod, frame_masking, charge_err], "uboone-preproc"), //changed Ewerton 2023-10-05
         //ret: g.pipeline([chsel_pipes, cmm_mod, frame_masking, charge_err], "uboone-preproc"), //changed Ewerton 2023-10-05
     }.ret,
 
@@ -323,7 +323,8 @@ function() {
             img.tiling(anode, anode.name),
             img.solving(anode, anode.name),
             // img.clustering(anode, anode.name),
-            img.dump(anode, anode.name, params.lar.drift_speed),])
+            // img.dump(anode, anode.name, params.lar.drift_speed),
+            ])
     else if multi_slicing == "active"
     then g.pipeline([
             img.multi_active_slicing_tiling(anode, anode.name+"-ms-active", 4),

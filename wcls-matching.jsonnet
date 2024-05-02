@@ -6,8 +6,8 @@ local raw_input_label = std.extVar('raw_input_label');  // eg "daq"
 local wc = import 'wirecell.jsonnet';
 local g = import 'pgraph.jsonnet';
 
-local data_params = import 'params.jsonnet';
-local simu_params = import 'simparams.jsonnet';
+local data_params = import 'pgrapher/experiment/sbnd/params.jsonnet';
+local simu_params = import 'pgrapher/experiment/sbnd/simparams.jsonnet';
 
 local reality = 'data';
 local params = if reality == 'data' then data_params else simu_params;
@@ -86,7 +86,7 @@ local img = import 'pgrapher/experiment/sbnd/img.jsonnet';
 local img_maker = img();
 local img_pipes = [img_maker.per_anode(a) for a in tools.anodes];
 
-local clus = import 'pgrapher/experiment/sbnd/img.jsonnet';
+local clus = import 'pgrapher/experiment/sbnd/clustering.jsonnet';
 local clus_maker = clus();
 local clus_pipes = [clus_maker.per_anode(a) for a in tools.anodes];
 
@@ -169,7 +169,8 @@ local matching_pipes = [
     for n in std.range(0, std.length(tools.anodes) - 1)
 ];
 
-local graph = g.fan.fanout("FrameFanout", matching_pipes);
+local main_pipe = g.fan.fanout("FrameFanout", matching_pipes);
+local graph = g.pipeline([wcls_input.adc_digits, main_pipe]);
 
 local app = {
   type: 'Pgrapher',

@@ -4,7 +4,7 @@ local f = import 'pgrapher/common/funcs.jsonnet';
 
 function (bee_dir = "data")
 {
-    local per_anode(anode) = {
+    per_anode(anode) :: {
         // Note, the "sampler" must be unique to the "sampling".
         local bs_live = {
             type: "BlobSampler",
@@ -19,7 +19,7 @@ function (bee_dir = "data")
                 ],
                 // extra: [".*"] // want all the extra
                 extra: [] // no extra
-            }};
+            }},
         local bs_dead = {
             type: "BlobSampler",
             name: "bs_dead%d" % anode.data.ident,
@@ -28,7 +28,7 @@ function (bee_dir = "data")
                     "center",
                 ],
                 extra: [".*"] // want all the extra
-            }};
+            }},
 
         local ptb = g.pnode({
             type: "PointTreeBuilding",
@@ -41,7 +41,7 @@ function (bee_dir = "data")
                 multiplicity: 1,
                 tags: ["live", "dead"],
             }
-        }, nin=1, nout=1, uses=[bs_live, bs_dead]);
+        }, nin=1, nout=1, uses=[bs_live, bs_dead]),
 
         local mabc = g.pnode({
             type: "MultiAlgBlobClustering",
@@ -54,8 +54,8 @@ function (bee_dir = "data")
                 // bee_dir: "", // "data/0/0",
                 dead_live_overlap_offset: 2,
             }
-        }, nin=1, nout=1, uses=[]);
+        }, nin=1, nout=1, uses=[]),
 
-        ret: g.pipeline([ptb, mabc]);
-    }.ret;
+        ret: g.pipeline([ptb, mabc]),
+    }.ret,
 }
