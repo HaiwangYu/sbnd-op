@@ -39,13 +39,14 @@ physics :{
             loglevels: ["debug"]
 
             # Libraries in which to look for WCT components
-            plugins: ["WireCellSio", "WireCellRoot", "WireCellPgraph", "WireCellTbb", "WireCellLarsoft"]
+            plugins: ["WireCellSio", "WireCellRoot", "WireCellPgraph", "WireCellTbb", "WireCellLarsoft", "WireCellImg", "WireCellDevCLMatch"]
 
             # The tool marshals the art::Event to these visitors before.
             # See notes below in params.
             inputers: [
-                "wclsOpFlashSource"
-                , "wclsRawFrameSource"
+                "wclsRawFrameSource"
+                , "wclsOpFlashSource:tpc0"
+                # , "wclsOpFlashSource:tpc1"
                 ]
 
             # or after the WCT app is run.  These names MUST be used identically in the Jsonnet
@@ -55,10 +56,10 @@ physics :{
 
             # Set the "external variables" required by the Jsonnet.
             params : {
-               # label:instance:processName
-               opflash0_input_label: "opflashtpc0:",
-               opflash1_input_label: "opflashtpc1:",
-               raw_input_label: "daq:"
+                # label:instance:processName
+                opflash0_input_label: "opflashtpc0:"
+                opflash1_input_label: "opflashtpc1:"
+                raw_input_label: "simtpc2d:daq"
             }
          }
       }

@@ -56,6 +56,6 @@ function (bee_dir = "data")
             }
         }, nin=1, nout=1, uses=[]),
 
-        ret: g.pipeline([ptb, mabc]),
+        ret: g.pipeline([ptb]),
     }.ret,
 }

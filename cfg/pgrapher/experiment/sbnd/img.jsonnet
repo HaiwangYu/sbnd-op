@@ -20,8 +20,8 @@ local img = {
         type: 'WaveformMap',
         name: 'wfm',
         data: {
-            //filename: "microboone-charge-error.json.bz2", //commented 2023-10-17
-            filename: "sbnd-charge-error.json.bz2", //added 2023-10-17
+            filename: "microboone-charge-error.json.bz2", //commented 2023-10-17
+            // filename: "sbnd-charge-error.json.bz2", //added 2023-10-17
         }, uses: [],},
 
     local charge_err = g.pnode({

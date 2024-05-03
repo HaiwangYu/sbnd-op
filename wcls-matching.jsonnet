@@ -14,7 +14,10 @@ local params = if reality == 'data' then data_params else simu_params;
 
 
 local tools_maker = import 'pgrapher/common/tools.jsonnet';
-local tools = tools_maker(params);
+local tools_all = tools_maker(params);
+local tools = tools_all {
+    anodes: [tools_all.anodes[0]],
+};
 
 local wcls_maker = import 'pgrapher/ui/wcls/nodes.jsonnet';
 local wcls = wcls_maker(params, tools);
@@ -79,7 +82,7 @@ local chsel_pipes = [
 ];
 
 local sp_maker = import 'pgrapher/experiment/sbnd/sp.jsonnet';
-local sp = sp_maker(params, tools, { sparse: true });
+local sp = sp_maker(params, tools, { sparse: false });
 local sp_pipes = [sp.make_sigproc(a) for a in tools.anodes];
 
 local img = import 'pgrapher/experiment/sbnd/img.jsonnet';
