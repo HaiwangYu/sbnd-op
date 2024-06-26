@@ -11,8 +11,8 @@ function (bee_dir = "data")
             name: "bs_live%d" % anode.data.ident,
             data: {
                 // FIXME: if anode.data.ident == 0 ...
-                time_offset: -1600 * wc.us,
-                drift_speed: 1.101 * wc.mm / wc.us,
+                time_offset: -200 * wc.us,
+                drift_speed: 1.6 * wc.mm / wc.us,
                 strategy: [
                     "center",
                     "stepped",

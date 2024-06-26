@@ -46,7 +46,7 @@ physics :{
             inputers: [
                 "wclsRawFrameSource"
                 , "wclsOpFlashSource:tpc0"
-                # , "wclsOpFlashSource:tpc1"
+                , "wclsOpFlashSource:tpc1"
                 ]
 
             # or after the WCT app is run.  These names MUST be used identically in the Jsonnet

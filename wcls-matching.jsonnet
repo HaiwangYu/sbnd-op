@@ -16,7 +16,7 @@ local params = if reality == 'data' then data_params else simu_params;
 local tools_maker = import 'pgrapher/common/tools.jsonnet';
 local tools_all = tools_maker(params);
 local tools = tools_all {
-    anodes: [tools_all.anodes[0]],
+    // anodes: [tools_all.anodes[0]],
 };
 
 local wcls_maker = import 'pgrapher/ui/wcls/nodes.jsonnet';
@@ -119,7 +119,7 @@ local matching_pipe = [
         type: 'CLMatching',
         name: 'matching%d' % n,
         data: {
-            // TODO
+            anode: wc.tn(tools.anodes[n]),
         },
     }, nin=2, nout=1)
     for n in std.range(0, std.length(tools.anodes) - 1)
