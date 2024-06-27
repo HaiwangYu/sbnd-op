@@ -5,6 +5,7 @@ local f = import 'pgrapher/common/funcs.jsonnet';
 function (bee_dir = "data")
 {
     per_anode(anode) :: {
+        local drift_sign = if anode.data.ident == 0 then 1 else -1,
         // Note, the "sampler" must be unique to the "sampling".
         local bs_live = {
             type: "BlobSampler",
@@ -12,7 +13,7 @@ function (bee_dir = "data")
             data: {
                 // FIXME: if anode.data.ident == 0 ...
                 time_offset: -200 * wc.us,
-                drift_speed: 1.6 * wc.mm / wc.us,
+                drift_speed: drift_sign * 1.6 * wc.mm / wc.us,
                 strategy: [
                     "center",
                     "stepped",
