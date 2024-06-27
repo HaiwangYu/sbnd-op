@@ -1,5 +1,7 @@
 import json
 import re
+import os
+from optparse import OptionParser
 
 def str2apa(str):
     return re.search(r"apa(\d+)", str).group(1)
@@ -48,17 +50,28 @@ def merge_light(file1, file2):
     return merged_data
 
 if __name__ == "__main__":
+    parser = OptionParser()
+    parser.add_option('--cleanup', dest='cleanup', default=True,
+                      help='remove original files after merging')
+    (options, args) = parser.parse_args()
+
     qfile1 = "data/1/1-img-apa0.json"
     qfile2 = "data/1/1-img-apa1.json"
+    lfile1 = "data/1/1-op-apa0.json"
+    lfile2 = "data/1/1-op-apa1.json"
 
     qdata = merge_charge(qfile1, qfile2)
     qfile = re.sub(r"-apa\d+", "", qfile1)
     with open(qfile, 'w') as f:
         json.dump(qdata, f)
-    
-    lfile1 = "data/1/1-op-apa0.json"
-    lfile2 = "data/1/1-op-apa1.json"
+
     ldata = merge_light(lfile1, lfile2)
     lfile = re.sub(r"-apa\d+", "", lfile1)
     with open(lfile, 'w') as f:
         json.dump(ldata, f)
+    
+    if options.cleanup:
+        os.remove(qfile1)
+        os.remove(qfile2)
+        os.remove(lfile1)
+        os.remove(lfile2)
