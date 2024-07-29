@@ -39,7 +39,7 @@ physics :{
             loglevels: ["debug"]
 
             # Libraries in which to look for WCT components
-            plugins: ["WireCellSio", "WireCellRoot", "WireCellPgraph", "WireCellTbb", "WireCellLarsoft", "WireCellImg", "WireCellDevCLMatch"]
+            plugins: ["WireCellSio", "WireCellRoot", "WireCellPgraph", "WireCellTbb", "WireCellLarsoft", "WireCellImg", "WireCellQLMatch"]
 
             # The tool marshals the art::Event to these visitors before.
             # See notes below in params.
@@ -59,7 +59,8 @@ physics :{
                 # label:instance:processName
                 opflash0_input_label: "opflashtpc0:"
                 opflash1_input_label: "opflashtpc1:"
-                raw_input_label: "simtpc2d:daq"
+                # raw_input_label: "simtpc2d:daq"
+                raw_input_label: "daq"
             }
          }
       }

@@ -92,29 +92,35 @@ def merge_light(file_list, charge_data):
 
 if __name__ == "__main__":
     parser = OptionParser()
+    parser.add_option('--inpath', dest='inpath',
+                      help='path to the input files')
+    parser.add_option('--outpath', dest='outpath',
+                      help='path to the output files')
+    parser.add_option('--eventNo', dest='eventNo',
+                      help='event number')
     parser.add_option('--cleanup', dest='cleanup', default=False,
                       help='remove original files after merging')
     (options, args) = parser.parse_args()
 
-    qfile1 = "data-2024-06-26/1/1-img-apa0.json"
-    qfile2 = "data-2024-06-26/1/1-img-apa1.json"
-    lfile1 = "data-2024-06-26/1/1-op-apa0.json"
-    lfile2 = "data-2024-06-26/1/1-op-apa1.json"
 
-    qdata = merge_charge([qfile1, qfile2])
-    # qfile = re.sub(r"-apa\d+", "", qfile1)
-    qfile = "data/0/0-img.json"
+    inpath_event = f"{options.inpath}/{options.eventNo}"
+    qfiles = [inpath_event+"/"+f for f in os.listdir(inpath_event) if re.search(r"img", f)]
+    lfiles = [inpath_event+"/"+f for f in os.listdir(inpath_event) if re.search(r"op", f)]
+
+    qdata = merge_charge(qfiles)
+    qfile = f"{options.outpath}/{options.eventNo}/{options.eventNo}-img.json"
+    qfile_dir = os.path.dirname(qfile)
+    os.makedirs(qfile_dir, exist_ok=True)
     with open(qfile, 'w') as f:
         json.dump(qdata, f)
 
-    ldata = merge_light([lfile1, lfile2], qdata)
-    # lfile = re.sub(r"-apa\d+", "", lfile1)
-    lfile = "data/0/0-op.json"
+    ldata = merge_light(lfiles, qdata)
+    lfile = f"{options.outpath}/{options.eventNo}/{options.eventNo}-op.json"
+    lfile_dir = os.path.dirname(lfile)
+    os.makedirs(lfile_dir, exist_ok=True)
     with open(lfile, 'w') as f:
         json.dump(ldata, f)
     
     if options.cleanup:
-        os.remove(qfile1)
-        os.remove(qfile2)
-        os.remove(lfile1)
-        os.remove(lfile2)
+        for f in qfiles + lfiles:
+            os.remove(f)

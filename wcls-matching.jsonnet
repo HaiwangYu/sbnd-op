@@ -104,7 +104,7 @@ local charge_pipe = [
         // nf_pipes[n],
         // sinks.raw_pipe[n],
         sp_pipes[n],
-        // sinks.decon_pipe[n],
+        sinks.decon_pipe[n],
         // sinks.threshold_pipe[n],
         // sinks.debug_pipe[n], // use_roi_debug_mode=true in sp.jsonnet
         img_pipes[n],
@@ -116,7 +116,7 @@ local charge_pipe = [
 
 local matching_pipe = [
     g.pnode({
-        type: 'CLMatching',
+        type: 'QLMatching',
         name: 'matching%d' % n,
         data: {
             anode: wc.tn(tools.anodes[n]),
