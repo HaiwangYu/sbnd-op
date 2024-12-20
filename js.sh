@@ -1,5 +1,6 @@
-cfg=/home/yuhw/wc/larsoft925/src/wct/cfg
-cfg1=/home/yuhw/wc/sbnd/op/cfg
+cfg=/exp/sbnd/app/users/yuhw/wct-cfg/cfg
+#cfg=/home/yuhw/wc/larsoft925/src/wct/cfg
+#cfg1=/home/yuhw/wc/sbnd/op/cfg
 
 name=$2
 name=${name%.*}
@@ -14,7 +15,6 @@ jsonnet \
 --ext-str opflash1_input_label="opflashtpc1:" \
 --ext-str raw_input_label="daq:" \
 -J $cfg \
--J $cfg1 \
 ${name}.jsonnet \
 -o ${name}.json
 fi

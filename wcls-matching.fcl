@@ -39,12 +39,13 @@ physics :{
             loglevels: ["debug"]
 
             # Libraries in which to look for WCT components
-            plugins: ["WireCellSio", "WireCellRoot", "WireCellPgraph", "WireCellTbb", "WireCellLarsoft", "WireCellImg", "WireCellQLMatch"]
+            plugins: ["WireCellSio", "WireCellRoot", "WireCellPgraph", "WireCellTbb", "WireCellLarsoft", "WireCellImg", "WireCellClus", "WireCellQLMatch"]
 
             # The tool marshals the art::Event to these visitors before.
             # See notes below in params.
             inputers: [
-                "wclsRawFrameSource"
+                # "wclsRawFrameSource"
+                "wclsCookedFrameSource:sigs"
                 , "wclsOpFlashSource:tpc0"
                 , "wclsOpFlashSource:tpc1"
                 ]
@@ -59,8 +60,18 @@ physics :{
                 # label:instance:processName
                 opflash0_input_label: "opflashtpc0:"
                 opflash1_input_label: "opflashtpc1:"
-                # raw_input_label: "simtpc2d:daq"
-                raw_input_label: "daq"
+                raw_input_label: "simtpc2d:daq"
+                # raw_input_label: "daq"
+
+                # for sig input
+    
+                # Moon
+                input_wiener_label: "sptpc2d:wiener"
+                input_gauss_label: "sptpc2d:gauss"
+                threshold_tag: "sptpc2d:wienersummary" #"wctsp:wiener" #"wctsp:threshold"
+                badmasks_inputTag: "sptpc2d:badmasks"
+                # do the BlobReframer
+                use_blob_reframer: "false"
             }
          }
       }

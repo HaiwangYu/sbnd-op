@@ -51,6 +51,21 @@ local wcls_input = {
       // nticks: params.daq.nticks,
     },
   }, nin=0, nout=1),
+    sigs: g.pnode({
+        type: 'wclsCookedFrameSource', //added wcls Ewerton 2023-07-27
+        name: 'sigs',
+        data: {
+            nticks: params.daq.nticks,
+            scale: 50,                             // scale up input recob::Wire by this factor
+            frame_tags: ["orig"],                 // frame tags (only one frame in this module)
+            recobwire_tags: ["sptpc2d:gauss", "sptpc2d:wiener"],
+            trace_tags: ["gauss", "wiener"],
+            summary_tags: ["", "sptpc2d:wienersummary"],
+            input_mask_tags: ["sptpc2d:badmasks"],
+            output_mask_tags: ["bad"],
+            debug_channel: 6800                   // debug purposes. Deleteme later. 
+        },
+    }, nin=0, nout=1),
 };
 
 local opflash_sink = function(anode, aname) {
@@ -72,7 +87,7 @@ local opflash_sink = function(anode, aname) {
 local chsel_pipes = [
   g.pnode({
     type: 'ChannelSelector',
-    name: 'chsel%d' % n,
+    name: 'chsel-sigproc-%d' % n,
     data: {
       channels: std.range(5638 * n, 5638 * (n + 1) - 1),
       //tags: ['orig%d' % n], // traces tag
@@ -87,11 +102,22 @@ local sp_pipes = [sp.make_sigproc(a) for a in tools.anodes];
 
 local img = import 'pgrapher/experiment/sbnd/img.jsonnet';
 local img_maker = img();
-local img_pipes = [img_maker.per_anode(a) for a in tools.anodes];
+local img_pipes = [img_maker.per_anode(a, "multi-3view", add_dump = false) for a in tools.anodes];
 
-local clus = import 'pgrapher/experiment/sbnd/clustering.jsonnet';
+local clus = import 'pgrapher/experiment/sbnd/clus.jsonnet';
 local clus_maker = clus();
-local clus_pipes = [clus_maker.per_anode(a) for a in tools.anodes];
+local clus_pipes = [clus_maker.per_volume(tools.anodes[0], face=0, dump=false), clus_maker.per_volume(tools.anodes[1], face=1, dump=false)];
+
+local img_clus_pipe = [g.intern(
+    innodes = [img_pipes[n]],
+    centernodes = [],
+    outnodes = [clus_pipes[n]],
+    edges = [
+        g.edge(img_pipes[n], clus_pipes[n], p, p)
+        for p in std.range(0, 1)
+    ]
+)
+for n in std.range(0, std.length(tools.anodes) - 1)];
 
 local magoutput = 'protodune-data-check.root';
 local magnify = import 'pgrapher/experiment/sbnd/magnify-sinks.jsonnet';
@@ -99,16 +125,15 @@ local sinks = magnify(tools, magoutput);
 
 local charge_pipe = [
     g.pipeline([
-        chsel_pipes[n],
+        // chsel_pipes[n],
         // sinks.orig_pipe[n],
         // nf_pipes[n],
         // sinks.raw_pipe[n],
-        sp_pipes[n],
-        sinks.decon_pipe[n],
+        // sp_pipes[n],
+        // sinks.decon_pipe[n],
         // sinks.threshold_pipe[n],
         // sinks.debug_pipe[n], // use_roi_debug_mode=true in sp.jsonnet
-        img_pipes[n],
-        clus_pipes[n],
+        img_clus_pipe[n],
         ],
         'charge_pipe_%d' % n)
     for n in std.range(0, std.length(tools.anodes) - 1)
@@ -172,8 +197,28 @@ local matching_pipes = [
     for n in std.range(0, std.length(tools.anodes) - 1)
 ];
 
-local main_pipe = g.fan.fanout("FrameFanout", matching_pipes);
-local graph = g.pipeline([wcls_input.adc_digits, main_pipe]);
+local fanout_apa_rules =
+[
+    {
+        frame: {
+            //'.*': 'number%d' % n,
+            //'.*': 'gauss%d' % n,
+            //'.*': 'framefanout%d ' % n,
+            '.*': 'orig%d' % n,
+        },
+        trace: {
+            // fake doing Nmult SP pipelines
+            //orig: ['wiener', 'gauss'],
+            gauss: 'gauss%d' % n, //uncommented Ewerton 2023-09-27
+            wiener: 'wiener%d' % n, //created Ewerton 2023-09-27
+            //'.*': 'orig',
+        },
+    }
+    for n in std.range(0, std.length(tools.anodes) - 1)
+];
+local main_pipe = g.fan.fanout("FrameFanout", matching_pipes, "parallel_graph", fanout_apa_rules);
+// local main_pipe = g.fan.fanout("FrameFanout", matching_pipes);
+local graph = g.pipeline([wcls_input.sigs, main_pipe]);
 
 local app = {
   type: 'Pgrapher',
