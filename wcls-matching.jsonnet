@@ -9,7 +9,7 @@ local g = import 'pgraph.jsonnet';
 local data_params = import 'pgrapher/experiment/sbnd/params.jsonnet';
 local simu_params = import 'pgrapher/experiment/sbnd/simparams.jsonnet';
 
-local reality = 'data';
+local reality = std.extVar('reality');
 local params = if reality == 'data' then data_params else simu_params;
 
 
@@ -51,7 +51,8 @@ local wcls_input = {
       // nticks: params.daq.nticks,
     },
   }, nin=0, nout=1),
-    sigs: g.pnode({
+    sigs: if reality == 'data' then
+    g.pnode({
         type: 'wclsCookedFrameSource', //added wcls Ewerton 2023-07-27
         name: 'sigs',
         data: {
@@ -64,6 +65,21 @@ local wcls_input = {
             input_mask_tags: ["sptpc2d:badmasks"],
             output_mask_tags: ["bad"],
             debug_channel: 6800                   // debug purposes. Deleteme later. 
+        },
+    }, nin=0, nout=1)
+    else
+    g.pnode({
+        type: 'wclsCookedFrameSource', //added wcls Ewerton 2023-07-27
+        name: 'sigs',
+        data: {
+            nticks: params.daq.nticks,
+            scale: 50,                             // scale up input recob::Wire by this factor
+            frame_tags: ["orig"],                 // frame tags (only one frame in this module)
+            recobwire_tags: ["simtpc2d:gauss", "simtpc2d:wiener"],
+            trace_tags: ["gauss", "wiener"],
+            summary_tags: ["", "simtpc2d:wienersummary"],
+            input_mask_tags: ["simtpc2d:badmasks"],
+            output_mask_tags: ["bad"],
         },
     }, nin=0, nout=1),
 };
@@ -145,6 +161,7 @@ local matching_pipe = [
         name: 'matching%d' % n,
         data: {
             anode: wc.tn(tools.anodes[n]),
+            bee_dir: "data-sep"
         },
     }, nin=2, nout=1)
     for n in std.range(0, std.length(tools.anodes) - 1)
