@@ -61,7 +61,7 @@ physics :{
                 opflash0_input_label: "opflashtpc0:"
                 opflash1_input_label: "opflashtpc1:"
                 raw_input_label: "simtpc2d:daq"
-                reality: "data" # "data" or "sim"
+                reality: "sim" # "data" or "sim"
             }
          }
       }
