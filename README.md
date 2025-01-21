@@ -12,7 +12,7 @@ lar -n 1 -c wcls-matching.fcl -s lynn-sim.root -o tmp.root
 ./merge-upload.sh <event-num>
 ```
 
-## dump light info
+## dump light info (not needed and may be obsolete)
 ```bash
 lar -n 1 -c wcls-flash-dump.fcl -s input-moon.root -o tmp.root
 wirecell-img bee-flashes -o test.json tensor-apa-anode0.tar.gz
