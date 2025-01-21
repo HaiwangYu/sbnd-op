@@ -9,7 +9,7 @@ source /exp/sbnd/app/users/yuhw/wcp-porting-img/sbnd/setup.sh
 ## run matching
 ```bash
 lar -n 1 -c wcls-matching.fcl -s lynn-sim.root -o tmp.root
-./merge-upload.sh <event-num>
+./merge-upload.sh <event-num> # merge per-APA results and upload to BEE
 ```
 
 ## dump light info (not needed and may be obsolete)
