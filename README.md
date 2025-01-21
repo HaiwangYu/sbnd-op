@@ -1,5 +1,6 @@
-# sbnd-op
+# Collection of scripts to run QL-Matchings
 
+## setup using Haiwang's local builds
 ```bash
 # in gpvm SL7 container
 source /exp/sbnd/app/users/yuhw/wcp-porting-img/sbnd/setup.sh
@@ -17,7 +18,7 @@ lar -n 1 -c wcls-flash-dump.fcl -s input-moon.root -o tmp.root
 wirecell-img bee-flashes -o test.json tensor-apa-anode0.tar.gz
 ```
 
-# Haiwang's cheat sheet to compile `larwirecell` using local `wirecell` build
+## Haiwang's cheat sheet to compile `larwirecell` using local `wirecell` build
 Initial setup
 ```bash
 source /cvmfs/sbnd.opensciencegrid.org/products/sbnd/setup_sbnd.sh
