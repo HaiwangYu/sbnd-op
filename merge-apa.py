@@ -31,7 +31,7 @@ def merge_charge(file_list):
         merged_data["runNo"] = data["runNo"]
         merged_data["type"] = data["type"]
         merged_data["geom"] = "sbnd"
-        merged_data["cluster_id"].extend([id + max_cluster_id for id in data["cluster_id"]])
+        merged_data["cluster_id"].extend(data["cluster_id"])
         merged_data["apa"].extend([str2apa(file)] * len(data["cluster_id"]))
         merged_data["x"].extend(data["x"])
         merged_data["y"].extend(data["y"])
