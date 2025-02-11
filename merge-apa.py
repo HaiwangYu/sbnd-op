@@ -67,7 +67,7 @@ def merge_light(file_list, charge_data):
         merged_data["subRunNo"] = data["subRunNo"]
         merged_data["runNo"] = data["runNo"]
         merged_data["geom"] = "sbnd"
-        merged_data["cluster_id"].extend([all_cluster_id for _ in data["cluster_id"]])
+        merged_data["cluster_id"].extend(data["cluster_id"])
         merged_data["apa"].extend([str2apa(file)] * len(data["cluster_id"]))
         merged_data["op_peTotal"].extend(data["op_peTotal"])
         merged_data["op_pes"].extend(data["op_pes"])

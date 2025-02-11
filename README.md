@@ -8,8 +8,10 @@ source /exp/sbnd/app/users/yuhw/wcp-porting-img/sbnd/setup.sh
 
 ## run matching
 ```bash
-lar -n 1 -c wcls-matching.fcl -s lynn-sim.root -o tmp.root
+lar --nskip 1 -n 1 -c wcls-matching.fcl -s lynn-sim.root -o tmp.root
 ./merge-upload.sh <event-num> # merge per-APA results and upload to BEE
+# e.g. check data-sep/ for the event number
+./merge-upload.sh 2
 ```
 
 ## dump light info (not needed and may be obsolete)
