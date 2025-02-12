@@ -6,7 +6,10 @@ from optparse import OptionParser
 def str2apa(str):
     return re.search(r"apa(\d+)", str).group(1)
 
-def merge_charge(file_list):
+def merge_charge(file_list, cluster_id_offset_per_file=1000):
+    '''
+    cluster_id increases by cluster_id_offset_per_file for each file
+    '''
     merged_data = {
         "eventNo": [],
         "subRunNo": [],
@@ -21,7 +24,7 @@ def merge_charge(file_list):
         "q": [],
     }
 
-    max_cluster_id = 0
+    cluster_id_offset = 0
     for file in file_list:
         with open(file, 'r') as f:
             data = json.load(f)
@@ -31,19 +34,19 @@ def merge_charge(file_list):
         merged_data["runNo"] = data["runNo"]
         merged_data["type"] = data["type"]
         merged_data["geom"] = "sbnd"
-        merged_data["cluster_id"].extend(data["cluster_id"])
+        merged_data["cluster_id"].extend([id + cluster_id_offset for id in data["cluster_id"]])
         merged_data["apa"].extend([str2apa(file)] * len(data["cluster_id"]))
         merged_data["x"].extend(data["x"])
         merged_data["y"].extend(data["y"])
         merged_data["z"].extend(data["z"])
         merged_data["q"].extend(data["q"])
 
-        max_cluster_id = max(merged_data["cluster_id"])
+        cluster_id_offset = cluster_id_offset + cluster_id_offset_per_file
 
     return merged_data
 
 
-def merge_light(file_list, charge_data):
+def merge_light(file_list, charge_data, cluster_id_offset_per_file=1000):
     merged_data = {
         "eventNo": [],
         "subRunNo": [],
@@ -59,6 +62,7 @@ def merge_light(file_list, charge_data):
 
     all_cluster_id = sorted(set(charge_data["cluster_id"]))
 
+    cluster_id_offset = 0
     for file in file_list:
         with open(file, 'r') as f:
             data = json.load(f)
@@ -67,12 +71,17 @@ def merge_light(file_list, charge_data):
         merged_data["subRunNo"] = data["subRunNo"]
         merged_data["runNo"] = data["runNo"]
         merged_data["geom"] = "sbnd"
-        merged_data["cluster_id"].extend(data["cluster_id"])
+        cluster_ids_all_apa = [[x + cluster_id_offset for x in sublist] for sublist in data["cluster_id"]]
+        
+        merged_data["cluster_id"].extend(cluster_ids_all_apa)
         merged_data["apa"].extend([str2apa(file)] * len(data["cluster_id"]))
         merged_data["op_peTotal"].extend(data["op_peTotal"])
         merged_data["op_pes"].extend(data["op_pes"])
         merged_data["op_pes_pred"].extend(data["op_pes_pred"])
         merged_data["op_t"].extend([t * 1000 for t in data["op_t"]])
+
+        print(f"file: {merged_data['cluster_id']}")
+        cluster_id_offset = cluster_id_offset + cluster_id_offset_per_file
 
     sorted_indices = sorted(range(len(merged_data["op_t"])), key=lambda k: merged_data["op_t"][k])
     sorted_data = {
