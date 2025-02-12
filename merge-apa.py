@@ -41,6 +41,7 @@ def merge_charge(file_list, cluster_id_offset_per_file=1000):
         merged_data["z"].extend(data["z"])
         merged_data["q"].extend(data["q"])
 
+        # print(f"{file}: {max(merged_data['cluster_id'])}")
         cluster_id_offset = cluster_id_offset + cluster_id_offset_per_file
 
     return merged_data
@@ -80,7 +81,7 @@ def merge_light(file_list, charge_data, cluster_id_offset_per_file=1000):
         merged_data["op_pes_pred"].extend(data["op_pes_pred"])
         merged_data["op_t"].extend([t * 1000 for t in data["op_t"]])
 
-        print(f"file: {merged_data['cluster_id']}")
+        # print(f"{file}: {merged_data['cluster_id']}")
         cluster_id_offset = cluster_id_offset + cluster_id_offset_per_file
 
     sorted_indices = sorted(range(len(merged_data["op_t"])), key=lambda k: merged_data["op_t"][k])
