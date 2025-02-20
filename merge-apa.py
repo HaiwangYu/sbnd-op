@@ -79,7 +79,7 @@ def merge_light(file_list, charge_data, cluster_id_offset_per_file=1000):
         merged_data["op_peTotal"].extend(data["op_peTotal"])
         merged_data["op_pes"].extend(data["op_pes"])
         merged_data["op_pes_pred"].extend(data["op_pes_pred"])
-        merged_data["op_t"].extend([t * 1000 for t in data["op_t"]])
+        merged_data["op_t"].extend(data["op_t"])
 
         # print(f"{file}: {merged_data['cluster_id']}")
         cluster_id_offset = cluster_id_offset + cluster_id_offset_per_file
@@ -114,8 +114,8 @@ if __name__ == "__main__":
 
 
     inpath_event = f"{options.inpath}/{options.eventNo}"
-    qfiles = [inpath_event+"/"+f for f in os.listdir(inpath_event) if re.search(r"img", f)]
-    lfiles = [inpath_event+"/"+f for f in os.listdir(inpath_event) if re.search(r"op", f)]
+    qfiles = [inpath_event+"/"+f for f in sorted(os.listdir(inpath_event)) if re.search(r"img", f)]
+    lfiles = [inpath_event+"/"+f for f in sorted(os.listdir(inpath_event)) if re.search(r"op", f)]
 
     qdata = merge_charge(qfiles)
     qfile = f"{options.outpath}/{options.eventNo}/{options.eventNo}-img.json"
