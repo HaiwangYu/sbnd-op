@@ -1,7 +1,6 @@
 local wc = import "wirecell.jsonnet";
 local g = import "pgraph.jsonnet";
 local f = import 'pgrapher/common/funcs.jsonnet';
-//local params = import "pgrapher/experiment/uboone/simparams.jsonnet";//commented Ewerton 2023-09-10
 local params = import "pgrapher/experiment/sbnd/simparams.jsonnet"; //added Ewerton 2023-09-10
 local tools_maker = import 'pgrapher/common/tools.jsonnet';
 local tools = tools_maker(params);
@@ -20,8 +19,8 @@ local img = {
         type: 'WaveformMap',
         name: 'wfm',
         data: {
-            filename: "microboone-charge-error.json.bz2", //commented 2023-10-17
-            // filename: "sbnd-charge-error.json.bz2", //added 2023-10-17
+            //filename: "microboone-charge-error.json.bz2", //commented 2023-10-17
+            filename: "sbnd-charge-error.json.bz2", //added 2023-10-17
         }, uses: [],},
 
     local charge_err = g.pnode({
@@ -38,32 +37,32 @@ local img = {
         },
     }, nin=1, nout=1, uses=[waveform_map, anode]),
 
-    // // added Ewerton 2023-08-23
-    // local chsel_pipes = 
-    //   g.pnode({
-    //     type: 'ChannelSelector',
-    //     //name: 'chsel%d' % n,
-    //     name: 'chsel%d' % anode.data.ident,
-    //     data: {
-    //       channels: std.range(5632 * anode.data.ident, 5632 * (anode.data.ident + 1) - 1),
-    //       //tags: ['orig%d' % n], // traces tag //commented? Ewerton 2023-09-xx
-    //       tags: ['gauss%d' % anode.data.ident, 'wiener%d' % anode.data.ident], // changed Ewerton 2023-09-27
-    //     },
-    //   }, nin=1, nout=1, uses=[anode]),
+    // added Ewerton 2023-08-23
+    local chsel_pipes = 
+      g.pnode({
+        type: 'ChannelSelector',
+        //name: 'chsel%d' % n,
+        name: 'chsel%d' % anode.data.ident,
+        data: {
+          channels: std.range(5632 * anode.data.ident, 5632 * (anode.data.ident + 1) - 1),
+          //tags: ['orig%d' % n], // traces tag //commented? Ewerton 2023-09-xx
+          tags: ['gauss%d' % anode.data.ident, 'wiener%d' % anode.data.ident], // changed Ewerton 2023-09-27
+        },
+      }, nin=1, nout=1, uses=[anode]),
 
-    // local mag = g.pnode({
-    //       type: 'MagnifySink',
-    //       name: 'magimgtest%d' % anode.data.ident,
-    //       data: {
-    //             output_filename: "magoutput.root",
-    //             root_file_mode: 'UPDATE',
-    //             frames: ['gauss%d' %anode.data.ident, 'wiener%d' %anode.data.ident],
-    //             summaries: ['wiener%d' %anode.data.ident],
-    //             summary_operator: { ['wiener%d' % anode.data.ident]: 'set' },
-    //             trace_has_tag: true,
-    //             anode: wc.tn(anode),
-    //       },
-    // }, nin=1, nout=1, uses=[anode]),
+    local mag = g.pnode({
+          type: 'MagnifySink',
+          name: 'magimgtest%d' % anode.data.ident,
+          data: {
+                output_filename: "magoutput.root",
+                root_file_mode: 'UPDATE',
+                frames: ['gauss%d' %anode.data.ident, 'wiener%d' %anode.data.ident],
+                summaries: ['wiener%d' %anode.data.ident],
+                summary_operator: { ['wiener%d' % anode.data.ident]: 'set' },
+                trace_has_tag: true,
+                anode: wc.tn(anode),
+          },
+    }, nin=1, nout=1, uses=[anode]),
 
     local cmm_mod = g.pnode({
         type: 'CMMModifier',
@@ -126,8 +125,8 @@ local img = {
                 anode: wc.tn(anode),
             },
         }, nin=1, nout=1, uses=[anode]),
-        ret: g.pipeline([cmm_mod, frame_masking, charge_err], "uboone-preproc"), //changed Ewerton 2023-10-05
-        //ret: g.pipeline([chsel_pipes, cmm_mod, frame_masking, charge_err], "uboone-preproc"), //changed Ewerton 2023-10-05
+        //ret: g.pipeline([chsel_pipes, mag, cmm_mod, frame_masking, charge_err], "uboone-preproc"), //changed Ewerton 2023-10-05
+        ret: g.pipeline([chsel_pipes, cmm_mod, frame_masking, charge_err], "uboone-preproc"), //changed Ewerton 2023-10-05
     }.ret,
 
     // A functio that sets up slicing for an APA.
@@ -138,6 +137,7 @@ local img = {
             data: {
                 tick_span: span,
                 wiener_tag: "wiener%d" % anode.data.ident,
+                summary_tag: "wiener%d" % anode.data.ident,
                 charge_tag: "gauss%d" % anode.data.ident,
                 error_tag: "gauss_error%d" % anode.data.ident,
                 anode: wc.tn(anode),
@@ -184,7 +184,7 @@ local img = {
         local tilings = [$.tiling(anode, name+"_%d"%n)
             for n in iota],
         local multipass = [g.pipeline([slicings[n],tilings[n]]) for n in iota],
-        ret: f.fanpipe("FrameFanout", multipass, "BlobSetMerge", "multi_active_slicing_tiling"),
+        ret: f.fanpipe("FrameFanout", multipass, "BlobSetMerge", "multi_active_slicing_tiling-%s"%anode.name),
     }.ret,
 
     //
@@ -198,7 +198,7 @@ local img = {
         local tilings = [$.tiling(anode, name+"_%d"%n)
             for n in iota],
         local multipass = [g.pipeline([slicings[n],tilings[n]]) for n in iota],
-        ret: f.fanpipe("FrameFanout", multipass, "BlobSetMerge", "multi_masked_slicing_tiling"),
+        ret: f.fanpipe("FrameFanout", multipass, "BlobSetMerge", "multi_masked_slicing_tiling-%s"%anode.name),
     }.ret,
 
     local clustering_policy = "uboone", // uboone, simple
@@ -314,7 +314,7 @@ local img = {
 };
 
 function() {
-    local imgpipe (anode, multi_slicing) =
+    local imgpipe (anode, multi_slicing, add_dump = true) =
     if multi_slicing == "single"
     then g.pipeline([
             // img.slicing(anode, anode.name, 109, active_planes=[0,1,2], masked_planes=[],dummy_planes=[]), // 109*22*4
@@ -323,36 +323,43 @@ function() {
             img.tiling(anode, anode.name),
             img.solving(anode, anode.name),
             // img.clustering(anode, anode.name),
-            // img.dump(anode, anode.name, params.lar.drift_speed),
-            ])
+            ] + if add_dump then [
+            img.dump(anode, anode.name, params.lar.drift_speed),] else [])
     else if multi_slicing == "active"
     then g.pipeline([
             img.multi_active_slicing_tiling(anode, anode.name+"-ms-active", 4),
             img.solving(anode, anode.name+"-ms-active"),
             // img.clustering(anode, anode.name+"-ms-active"),
-            img.dump(anode, anode.name+"-ms-active", params.lar.drift_speed)])
+            ] + if add_dump then [
+            img.dump(anode, anode.name+"-ms-active", params.lar.drift_speed),] else [])
     else if multi_slicing == "masked"
     then g.pipeline([
             img.multi_masked_2view_slicing_tiling(anode, anode.name+"-ms-masked", 500),
             img.clustering(anode, anode.name+"-ms-masked"),
-            img.dump(anode, anode.name+"-ms-masked", params.lar.drift_speed)])
+            ] + if add_dump then [
+            img.dump(anode, anode.name+"-ms-masked", params.lar.drift_speed),] else [])
     else {
+        local st = if multi_slicing == "multi-2view"
+        then img.multi_active_slicing_tiling(anode, anode.name+"-ms-active", 4)
+        else g.pipeline([
+            img.slicing(anode, anode.name, 4, active_planes=[0,1,2], masked_planes=[],dummy_planes=[]), // 109*22*4
+            img.tiling(anode, anode.name),]),
         local active_fork = g.pipeline([
-            img.multi_active_slicing_tiling(anode, anode.name+"-ms-active", 4),
+            st,
             img.solving(anode, anode.name+"-ms-active"),
-            img.dump(anode, anode.name+"-ms-active", params.lar.drift_speed),
-        ]),
+            ] + if add_dump then [
+            img.dump(anode, anode.name+"-ms-active", params.lar.drift_speed),] else []),
         local masked_fork = g.pipeline([
             img.multi_masked_2view_slicing_tiling(anode, anode.name+"-ms-masked", 500), // 109, 1744 (total 9592)
             img.clustering(anode, anode.name+"-ms-masked"),
-            img.dump(anode, anode.name+"-ms-masked", params.lar.drift_speed),
-        ]),
-        ret: g.fan.fanout("FrameFanout",[active_fork,masked_fork], "fan_active_masked"),
+            ] + if add_dump then [
+            img.dump(anode, anode.name+"-ms-masked", params.lar.drift_speed),] else []),
+        ret: g.fan.fanout("FrameFanout",[active_fork,masked_fork], "fan_active_masked-%s"%anode.name),
     }.ret,
 
 
-    per_anode(anode) :: g.pipeline([
+    per_anode(anode, multi_slicing = "single", add_dump = true) :: g.pipeline([
         img.pre_proc(anode, anode.name),
-        imgpipe(anode, "single"),
+        imgpipe(anode, multi_slicing, add_dump),
         ], "per_anode"),
 }

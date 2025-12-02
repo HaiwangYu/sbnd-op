@@ -57,7 +57,8 @@ local wcls_input = {
         name: 'sigs',
         data: {
             nticks: params.daq.nticks,
-            scale: 50,                             // scale up input recob::Wire by this factor
+            frame_scale: 50,                             // scale up input recob::Wire by this factor
+            summary_scale: 50,
             frame_tags: ["orig"],                 // frame tags (only one frame in this module)
             recobwire_tags: ["sptpc2d:gauss", "sptpc2d:wiener"],
             trace_tags: ["gauss", "wiener"],
@@ -119,6 +120,7 @@ local sp_pipes = [sp.make_sigproc(a) for a in tools.anodes];
 local img = import 'pgrapher/experiment/sbnd/img.jsonnet';
 local img_maker = img();
 local img_pipes = [img_maker.per_anode(a, "multi-3view", add_dump = false) for a in tools.anodes];
+// local img_pipes = [img_maker.per_anode(a, "multi-3view") for a in tools.anodes];
 
 local clus = import 'pgrapher/experiment/sbnd/clus.jsonnet';
 local clus_maker = clus();
@@ -161,7 +163,14 @@ local matching_pipe = [
         name: 'matching%d' % n,
         data: {
             anode: wc.tn(tools.anodes[n]),
-            bee_dir: "data-sep"
+            bee_dir: "data-sep",
+            // bee_dir : "",
+            beamonly: false,
+            data: if reality=='data' then true else false,
+            QtoL: 1.0,
+            // QtoL: if reality=='data' then 0.2 else 1.0,
+            ch_mask: [39, 66, 67, 69, 71, 85, 86, 87, 92, 115, 138, 141, 170, 197, 217, 218, 221, 222, 223, 226, 245, 248, 249, 302],
+            flash_minPE: 50,
         },
     }, nin=2, nout=1)
     for n in std.range(0, std.length(tools.anodes) - 1)
